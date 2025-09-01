@@ -1,5 +1,10 @@
 import Demo.Response;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.util.Scanner;
+
 public class Client
 {
     public static void main(String[] args)
@@ -17,9 +22,49 @@ public class Client
             {
                 throw new Error("Invalid proxy");
             }
-            response = service.printString("Hello World from a remote client!");
 
-            System.out.println("Respuesta del server: " + response.value + ", " + response.responseTime);
+            // Obtener username y hostname del cliente
+            String username = System.getProperty("user.name");
+            String hostname = "";
+            try {
+                hostname = InetAddress.getLocalHost().getHostName();
+            } catch(Exception e) {
+                hostname = "localhost";
+            }
+            String clientPrefix = username + "@" + hostname + ": ";
+
+            Scanner scanner = new Scanner(System.in);
+            String message = "";
+
+            System.out.println("Cliente iniciado. Prefijo: " + clientPrefix);
+            System.out.println("Escriba 'exit' para salir.");
+
+            // conexion del cliente
+            while(true) {
+                System.out.print("Ingrese mensaje: ");
+                message = scanner.nextLine().trim();
+
+                if("exit".equals(message)) {
+                    System.out.println("Cerrando cliente...");
+                    break;
+                }
+
+                // Anteponer prefijo al mensaje
+                String fullMessage = clientPrefix + message;
+
+                try {
+                    response = service.printString(fullMessage);
+                    System.out.println("Respuesta del servidor:");
+                    System.out.println("Codigo: " + response.responseTime);
+                    System.out.println("Mensaje: " + response.value);
+                    System.out.println("---");
+                } catch(Exception e) {
+                    System.err.println("Error al comunicarse con el servidor: " + e.getMessage());
+                }
+            }
+
+            scanner.close();
         }
     }
+
 }
