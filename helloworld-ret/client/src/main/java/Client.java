@@ -1,7 +1,5 @@
 import Demo.Response;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.util.Scanner;
 
@@ -35,17 +33,23 @@ public class Client
             Scanner scanner = new Scanner(System.in);
             String message = "";
 
-            System.out.println("Cliente iniciado");
-            System.out.println("/n Prefijo: " + clientPrefix);
-            System.out.println("Escriba 'exit' para salir.");
+            System.out.println("=====================================");
+            System.out.println("   🚀 Cliente iniciado correctamente ");
+            System.out.println("   👤 Usuario: " + username);
+            System.out.println("   💻 Hostname: " + hostname);
+            System.out.println("   📌 Prefijo: " + clientPrefix);
+            System.out.println("=====================================\n");
+            System.out.println("Escriba su mensaje y presione ENTER.");
+            System.out.println("Para salir escriba: 'exit'");
+            System.out.println("-------------------------------------");
 
             // conexion del cliente
             while(true) {
-                System.out.print("Ingrese mensaje: ");
+                System.out.print("\n👉 Ingrese mensaje: ");
                 message = scanner.nextLine().trim();
 
                 if("exit".equals(message)) {
-                    System.out.println("Cerrando cliente...");
+                    System.out.println("\n🔴 Cerrando cliente... ¡Hasta luego!");
                     break;
                 }
 
@@ -54,12 +58,13 @@ public class Client
 
                 try {
                     response = service.printString(fullMessage);
-                    System.out.println("Respuesta del servidor:");
-                    System.out.println("Estado: " + response.responseTime); // (0 = éxito, -1 = error).
-                    System.out.println("Mensaje: " + response.value);
-                    System.out.println("---");
+
+                    System.out.println("\n✅ Respuesta del servidor:");
+                    System.out.println("   ⏱ Estado: " + response.responseTime); // (0 = éxito, -1 = error).
+                    System.out.println("   📩 Mensaje: " + response.value);
+                    System.out.println("-------------------------------------");
                 } catch(Exception e) {
-                    System.err.println("Error al comunicarse con el servidor: " + e.getMessage());
+                    System.err.println("\n⚠️ Error al comunicarse con el servidor: " + e.getMessage());
                 }
             }
 

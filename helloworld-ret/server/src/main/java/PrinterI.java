@@ -17,8 +17,11 @@ public class PrinterI implements Demo.Printer
             message = fullMessage.substring(colonIndex + 2);
         }
 
-        System.out.println("=== Mensaje recibido de: " + clientPrefix + " ===");
-        System.out.println("Mensaje: " + message);
+        System.out.println("==============================================");
+        System.out.println("[Solicitud recibida]");
+        System.out.println("  • Cliente : " + (clientPrefix.isEmpty() ? "(desconocido)" : clientPrefix));
+        System.out.println("  • Mensaje : " + message);
+        System.out.println("----------------------------------------------");
 
         Response response = null;
 
@@ -43,15 +46,17 @@ public class PrinterI implements Demo.Printer
             }
             // Mensaje normal
             else {
-                System.out.println(clientPrefix + ": " + message);
+                System.out.println("[Mensaje normal]");
+                System.out.println("  " + (clientPrefix.isEmpty() ? "" : (clientPrefix + ": ")) + message);
                 response = new Response(0, "Echo: " + message);
             }
         } catch(Exception e) {
-            System.err.println("Error procesando mensaje: " + e.getMessage());
+            System.err.println("[Error] Ocurrió un problema procesando el mensaje:");
+            System.err.println("  Detalle: " + e.getMessage());
             response = new Response(-1, "Error: " + e.getMessage());
         }
 
-        System.out.println("===============================");
+        System.out.println("==============================================\n");
         return response;
     }
 
@@ -67,15 +72,17 @@ public class PrinterI implements Demo.Printer
 
     // Manejar serie de Fibonacci y factores primos
     private Response handleFibonacci(int n, String clientPrefix) {
-        System.out.println(clientPrefix + " solicito Fibonacci(" + n + ")");
+        System.out.println("[Fibonacci]");
+        System.out.println("  • Solicitante : " + (clientPrefix.isEmpty() ? "(desconocido)" : clientPrefix));
+        System.out.println("  • Parámetro n : " + n);
 
         // Calcular y mostrar serie de Fibonacci
-        System.out.print("Serie Fibonacci(" + n + "): ");
+        System.out.print("  • Serie F(" + n + "): ");
         List<Long> fibSeries = new ArrayList<>();
         for(int i = 0; i <= n; i++) {
             long fib = fibonacci(i);
             fibSeries.add(fib);
-            System.out.print(fib + " ");
+            System.out.print(fib + (i < n ? " " : ""));
         }
         System.out.println();
 
@@ -83,7 +90,9 @@ public class PrinterI implements Demo.Printer
         long fibN = fibonacci(n);
         List<Long> primeFactors = getPrimeFactors(fibN);
 
-        System.out.println("Factores primos unicos de Fibonacci(" + n + ") = " + fibN + ": " + primeFactors);
+        System.out.println("  • F(" + n + ") = " + fibN);
+        System.out.println("  • Factores primos únicos: " + primeFactors);
+        System.out.println("----------------------------------------------");
 
         return new Response(0, "Factores primos de Fibonacci(" + n + "): " + primeFactors.toString());
     }
@@ -132,26 +141,35 @@ public class PrinterI implements Demo.Printer
 
     // Manejar listado de interfaces de red
     private Response handleListInterfaces(String clientPrefix) {
-        System.out.println(clientPrefix + " solicito listado de interfaces");
+        System.out.println("[Listar interfaces de red]");
+        System.out.println("  • Solicitante : " + (clientPrefix.isEmpty() ? "(desconocido)" : clientPrefix));
+
         // PARA WINDOWS
         String result = executeCommand("ipconfig /all");
 
         // PARA LINUX
         // String result = executeCommand("ip addr show");
 
-        System.out.println("Interfaces de red:");
-        System.out.println(result);
+        System.out.println("  • Resultado:");
+        System.out.println(result.isEmpty() ? "  (sin salida)" : result);
+        System.out.println("----------------------------------------------");
+
         return new Response(0, "Interfaces de red:\n" + result);
     }
 
     // Manejar listado de puertos
     private Response handleListPorts(String ip, String clientPrefix) {
-        System.out.println(clientPrefix + " solicito puertos abiertos de: " + ip);
+        System.out.println("[Listar puertos]");
+        System.out.println("  • Solicitante : " + (clientPrefix.isEmpty() ? "(desconocido)" : clientPrefix));
+        System.out.println("  • IP objetivo : " + ip);
 
         // Validar IP
         if(!isValidIP(ip)) {
-            return new Response(-1, "Dirección IP invalida: " + ip);
+            System.out.println("  • Validación: IP inválida");
+            System.out.println("----------------------------------------------");
+            return new Response(-1, "Dirección IP inválida: " + ip);
         }
+
         String result;
         // PARA WINDOWS
         result = executeCommand("netstat -an");
@@ -162,9 +180,10 @@ public class PrinterI implements Demo.Printer
         // PARA LINUX
         // result = executeCommand("nmap -sT " + ip);
 
+        System.out.println("  • Puertos abiertos / conexiones activas:");
+        System.out.println(result.isEmpty() ? "  (sin salida)" : result);
+        System.out.println("----------------------------------------------");
 
-        System.out.println("Puertos abiertos en " + ip + ":");
-        System.out.println(result);
         return new Response(0, "Puertos abiertos en " + ip + ":\n" + result);
     }
 
@@ -176,10 +195,16 @@ public class PrinterI implements Demo.Printer
 
     // Manejar ejecución de comandos
     private Response handleCommand(String command, String clientPrefix) {
-        System.out.println(clientPrefix + " solicito ejecutar: " + command);
+        System.out.println("[Ejecutar comando]");
+        System.out.println("  • Solicitante : " + (clientPrefix.isEmpty() ? "(desconocido)" : clientPrefix));
+        System.out.println("  • Comando     : " + command);
+
         String result = executeCommand(command);
-        System.out.println("Resultado del comando:");
-        System.out.println(result);
+
+        System.out.println("  • Resultado:");
+        System.out.println(result.isEmpty() ? "  (sin salida)" : result);
+        System.out.println("----------------------------------------------");
+
         return new Response(0, "Resultado de '" + command + "':\n" + result);
     }
 
