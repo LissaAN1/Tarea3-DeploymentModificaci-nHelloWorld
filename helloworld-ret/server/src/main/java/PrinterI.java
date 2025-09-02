@@ -133,10 +133,10 @@ public class PrinterI implements Demo.Printer
     // Manejar listado de interfaces de red
     private Response handleListInterfaces(String clientPrefix) {
         System.out.println(clientPrefix + " solicito listado de interfaces");
-        // PARA WINDOWS - Descomenta esta línea:
+        // PARA WINDOWS
         String result = executeCommand("ipconfig /all");
 
-        // PARA LINUX - Descomenta esta línea y comenta la de Windows:
+        // PARA LINUX
         // String result = executeCommand("ip addr show");
 
         System.out.println("Interfaces de red:");
@@ -153,13 +153,13 @@ public class PrinterI implements Demo.Printer
             return new Response(-1, "Dirección IP invalida: " + ip);
         }
         String result;
-        // PARA WINDOWS - Descomenta estas líneas:
+        // PARA WINDOWS
         result = executeCommand("netstat -an");
         if(result.contains("Error ejecutando comando") || result.trim().isEmpty()) {
             result = "Información de conexiones activas (netstat)";
         }
 
-        // PARA LINUX - Descomenta estas líneas y comenta las de Windows:
+        // PARA LINUX
         // result = executeCommand("nmap -sT " + ip);
 
 
@@ -187,10 +187,10 @@ public class PrinterI implements Demo.Printer
     private String executeCommand(String command) {
         StringBuilder output = new StringBuilder();
         try {
-            // PARA WINDOWS - Descomenta:
+            // PARA WINDOWS
             Process process = Runtime.getRuntime().exec("cmd.exe /c " + command);
 
-            // PARA LINUX - Descomenta y comenta la de Windows:
+            // PARA LINUX
             // Process process = Runtime.getRuntime().exec(command);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
