@@ -13,11 +13,10 @@ public class Client
 
         try(com.zeroc.Ice.Communicator communicator = com.zeroc.Ice.Util.initialize(args,"config.client",extraArgs))
         {
-            //com.zeroc.Ice.ObjectPrx base = communicator.stringToProxy("SimplePrinter:default -p 10000");
             Response response = null;
             Demo.PrinterPrx service = Demo.PrinterPrx
                     .checkedCast(communicator.propertyToProxy("Printer.Proxy"));
-            
+
             if(service == null)
             {
                 throw new Error("Invalid proxy");
@@ -31,12 +30,13 @@ public class Client
             } catch(Exception e) {
                 hostname = "localhost";
             }
-            String clientPrefix = username + "@" + hostname + ": ";
+            String clientPrefix = username + "@" + hostname;
 
             Scanner scanner = new Scanner(System.in);
             String message = "";
 
-            System.out.println("Cliente iniciado. Prefijo: " + clientPrefix);
+            System.out.println("Cliente iniciado");
+            System.out.println("/n Prefijo: " + clientPrefix);
             System.out.println("Escriba 'exit' para salir.");
 
             // conexion del cliente
@@ -50,12 +50,12 @@ public class Client
                 }
 
                 // Anteponer prefijo al mensaje
-                String fullMessage = clientPrefix + message;
+                String fullMessage = clientPrefix + ": " + message;
 
                 try {
                     response = service.printString(fullMessage);
                     System.out.println("Respuesta del servidor:");
-                    System.out.println("Codigo: " + response.responseTime);
+                    System.out.println("Estado: " + response.responseTime); // (0 = éxito, -1 = error).
                     System.out.println("Mensaje: " + response.value);
                     System.out.println("---");
                 } catch(Exception e) {
@@ -66,5 +66,4 @@ public class Client
             scanner.close();
         }
     }
-
 }

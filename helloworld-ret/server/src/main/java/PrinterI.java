@@ -83,7 +83,7 @@ public class PrinterI implements Demo.Printer
         long fibN = fibonacci(n);
         List<Long> primeFactors = getPrimeFactors(fibN);
 
-        System.out.println("Factores primos de Fibonacci(" + n + ") = " + fibN + ": " + primeFactors);
+        System.out.println("Factores primos unicos de Fibonacci(" + n + ") = " + fibN + ": " + primeFactors);
 
         return new Response(0, "Factores primos de Fibonacci(" + n + "): " + primeFactors.toString());
     }
@@ -100,36 +100,45 @@ public class PrinterI implements Demo.Printer
         return b;
     }
 
-    // Obtener factores primos de un número
+    // Obtener factores primos únicos de un número
     private List<Long> getPrimeFactors(long n) {
-        List<Long> factors = new ArrayList<>();
+        Set<Long> uniqueFactors = new HashSet<>();
 
         // Factorizar por 2
-        while(n % 2 == 0) {
-            factors.add(2L);
-            n /= 2;
+        if(n % 2 == 0) {
+            uniqueFactors.add(2L);
+            while(n % 2 == 0) {
+                n /= 2;
+            }
         }
 
         // Factorizar por números impares
         for(long i = 3; i * i <= n; i += 2) {
-            while(n % i == 0) {
-                factors.add(i);
-                n /= i;
+            if(n % i == 0) {
+                uniqueFactors.add(i);
+                while(n % i == 0) {
+                    n /= i;
+                }
             }
         }
 
         // Si n es un primo mayor que 2
         if(n > 2) {
-            factors.add(n);
+            uniqueFactors.add(n);
         }
 
-        return factors;
+        return new ArrayList<>(uniqueFactors);
     }
 
     // Manejar listado de interfaces de red
     private Response handleListInterfaces(String clientPrefix) {
-        System.out.println(clientPrefix + " solicitó listado de interfaces");
-        String result = executeCommand("ip addr show");
+        System.out.println(clientPrefix + " solicito listado de interfaces");
+        // PARA WINDOWS - Descomenta esta línea:
+        String result = executeCommand("ipconfig /all");
+
+        // PARA LINUX - Descomenta esta línea y comenta la de Windows:
+        // String result = executeCommand("ip addr show");
+
         System.out.println("Interfaces de red:");
         System.out.println(result);
         return new Response(0, "Interfaces de red:\n" + result);
@@ -141,10 +150,19 @@ public class PrinterI implements Demo.Printer
 
         // Validar IP
         if(!isValidIP(ip)) {
-            return new Response(-1, "Dirección IP inválida: " + ip);
+            return new Response(-1, "Dirección IP invalida: " + ip);
+        }
+        String result;
+        // PARA WINDOWS - Descomenta estas líneas:
+        result = executeCommand("netstat -an");
+        if(result.contains("Error ejecutando comando") || result.trim().isEmpty()) {
+            result = "Información de conexiones activas (netstat)";
         }
 
-        String result = executeCommand("nmap -sT " + ip);
+        // PARA LINUX - Descomenta estas líneas y comenta las de Windows:
+        // result = executeCommand("nmap -sT " + ip);
+
+
         System.out.println("Puertos abiertos en " + ip + ":");
         System.out.println(result);
         return new Response(0, "Puertos abiertos en " + ip + ":\n" + result);
@@ -158,7 +176,7 @@ public class PrinterI implements Demo.Printer
 
     // Manejar ejecución de comandos
     private Response handleCommand(String command, String clientPrefix) {
-        System.out.println(clientPrefix + " solicitó ejecutar: " + command);
+        System.out.println(clientPrefix + " solicito ejecutar: " + command);
         String result = executeCommand(command);
         System.out.println("Resultado del comando:");
         System.out.println(result);
@@ -169,10 +187,14 @@ public class PrinterI implements Demo.Printer
     private String executeCommand(String command) {
         StringBuilder output = new StringBuilder();
         try {
-            Process process = Runtime.getRuntime().exec(command);
+            // PARA WINDOWS - Descomenta:
+            Process process = Runtime.getRuntime().exec("cmd.exe /c " + command);
+
+            // PARA LINUX - Descomenta y comenta la de Windows:
+            // Process process = Runtime.getRuntime().exec(command);
+
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-
             String line;
             while((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
