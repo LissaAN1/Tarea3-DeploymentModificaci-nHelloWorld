@@ -52,7 +52,6 @@ public class Client
             System.out.println("Escriba su mensaje y presione ENTER.");
             System.out.println("Para salir escriba: 'exit'");
             System.out.println("Para ver estadisticas escriba: 'stats'");
-            System.out.println("Para prueba de carga escriba: 'loadtest'");
             System.out.println("-------------------------------------");
 
             // Inicializar mediciones de performance
