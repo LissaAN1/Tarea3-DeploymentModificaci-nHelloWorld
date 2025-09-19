@@ -2,6 +2,7 @@ import Demo.Response;
 import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.math.BigInteger; // Importación añadida para BigInteger
 
 public class PrinterI implements Demo.Printer
 {
@@ -17,11 +18,8 @@ public class PrinterI implements Demo.Printer
             message = fullMessage.substring(colonIndex + 2);
         }
 
-        System.out.println("==============================================");
-        System.out.println("[Solicitud recibida]");
-        System.out.println("  • Cliente : " + (clientPrefix.isEmpty() ? "(desconocido)" : clientPrefix));
-        System.out.println("  • Mensaje : " + message);
-        System.out.println("----------------------------------------------");
+        System.out.println("=== Mensaje recibido de: " + clientPrefix + " ===");
+        System.out.println("Mensaje: " + message);
 
         Response response = null;
 
@@ -46,17 +44,15 @@ public class PrinterI implements Demo.Printer
             }
             // Mensaje normal
             else {
-                System.out.println("[Mensaje normal]");
-                System.out.println("  " + (clientPrefix.isEmpty() ? "" : (clientPrefix + ": ")) + message);
+                System.out.println(clientPrefix + ": " + message);
                 response = new Response(0, "Echo: " + message);
             }
         } catch(Exception e) {
-            System.err.println("[Error] Ocurrió un problema procesando el mensaje:");
-            System.err.println("  Detalle: " + e.getMessage());
+            System.err.println("Error procesando mensaje: " + e.getMessage());
             response = new Response(-1, "Error: " + e.getMessage());
         }
 
-        System.out.println("==============================================\n");
+        System.out.println("===============================");
         return response;
     }
 
@@ -72,68 +68,74 @@ public class PrinterI implements Demo.Printer
 
     // Manejar serie de Fibonacci y factores primos
     private Response handleFibonacci(int n, String clientPrefix) {
-        System.out.println("[Fibonacci]");
-        System.out.println("  • Solicitante : " + (clientPrefix.isEmpty() ? "(desconocido)" : clientPrefix));
-        System.out.println("  • Parámetro n : " + n);
+        System.out.println(clientPrefix + " solicito Fibonacci(" + n + ")");
 
         // Calcular y mostrar serie de Fibonacci
-        System.out.print("  • Serie F(" + n + "): ");
-        List<Long> fibSeries = new ArrayList<>();
+        System.out.print("Serie Fibonacci(" + n + "): ");
+        List<BigInteger> fibSeries = new ArrayList<>();
         for(int i = 0; i <= n; i++) {
-            long fib = fibonacci(i);
+            BigInteger fib = fibonacci(i);
             fibSeries.add(fib);
-            System.out.print(fib + (i < n ? " " : ""));
+            System.out.print(fib + " ");
         }
         System.out.println();
 
         // Calcular factores primos del n-ésimo término de Fibonacci
-        long fibN = fibonacci(n);
-        List<Long> primeFactors = getPrimeFactors(fibN);
+        BigInteger fibN = fibonacci(n);
+        List<BigInteger> primeFactors = getPrimeFactors(fibN);
 
-        System.out.println("  • F(" + n + ") = " + fibN);
-        System.out.println("  • Factores primos únicos: " + primeFactors);
-        System.out.println("----------------------------------------------");
+        System.out.println("Factores primos unicos de Fibonacci(" + n + ") = " + fibN + ": " + primeFactors);
 
         return new Response(0, "Factores primos de Fibonacci(" + n + "): " + primeFactors.toString());
     }
 
-    // Calcular n-ésimo término de Fibonacci
-    private long fibonacci(int n) {
-        if(n <= 1) return n;
-        long a = 0, b = 1, c;
+    // Calcular n-ésimo término de Fibonacci usando BigInteger para números grandes
+    private BigInteger fibonacci(int n) {
+        if(n <= 1) return BigInteger.valueOf(n);
+        BigInteger a = BigInteger.ZERO;
+        BigInteger b = BigInteger.ONE;
+        BigInteger c;
         for(int i = 2; i <= n; i++) {
-            c = a + b;
+            c = a.add(b);
             a = b;
             b = c;
         }
         return b;
     }
 
-    // Obtener factores primos únicos de un número
-    private List<Long> getPrimeFactors(long n) {
-        Set<Long> uniqueFactors = new HashSet<>();
+    // Obtener factores primos únicos de un número usando BigInteger
+    private List<BigInteger> getPrimeFactors(BigInteger n) {
+        Set<BigInteger> uniqueFactors = new HashSet<>();
+        BigInteger temp = n;
+
+        // Manejar el caso de 0 y 1
+        if (n.equals(BigInteger.ZERO) || n.equals(BigInteger.ONE)) {
+            return new ArrayList<>(uniqueFactors);
+        }
 
         // Factorizar por 2
-        if(n % 2 == 0) {
-            uniqueFactors.add(2L);
-            while(n % 2 == 0) {
-                n /= 2;
+        if (temp.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
+            uniqueFactors.add(BigInteger.TWO);
+            while (temp.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
+                temp = temp.divide(BigInteger.TWO);
             }
         }
 
         // Factorizar por números impares
-        for(long i = 3; i * i <= n; i += 2) {
-            if(n % i == 0) {
-                uniqueFactors.add(i);
-                while(n % i == 0) {
-                    n /= i;
+        BigInteger divisor = BigInteger.valueOf(3);
+        while (divisor.multiply(divisor).compareTo(temp) <= 0) {
+            if (temp.mod(divisor).equals(BigInteger.ZERO)) {
+                uniqueFactors.add(divisor);
+                while (temp.mod(divisor).equals(BigInteger.ZERO)) {
+                    temp = temp.divide(divisor);
                 }
             }
+            divisor = divisor.add(BigInteger.TWO);
         }
 
-        // Si n es un primo mayor que 2
-        if(n > 2) {
-            uniqueFactors.add(n);
+        // Si temp es un primo mayor que 2
+        if (temp.compareTo(BigInteger.ONE) > 0) {
+            uniqueFactors.add(temp);
         }
 
         return new ArrayList<>(uniqueFactors);
@@ -141,49 +143,37 @@ public class PrinterI implements Demo.Printer
 
     // Manejar listado de interfaces de red
     private Response handleListInterfaces(String clientPrefix) {
-        System.out.println("[Listar interfaces de red]");
-        System.out.println("  • Solicitante : " + (clientPrefix.isEmpty() ? "(desconocido)" : clientPrefix));
-
+        System.out.println(clientPrefix + " solicito listado de interfaces");
         // PARA WINDOWS
-        String result = executeCommand("ipconfig /all");
+        //String result = executeCommand("ipconfig /all");
 
         // PARA LINUX
-        // String result = executeCommand("ip addr show");
+        String result = executeCommand("ip addr show");
 
-        System.out.println("  • Resultado:");
-        System.out.println(result.isEmpty() ? "  (sin salida)" : result);
-        System.out.println("----------------------------------------------");
-
+        System.out.println("Interfaces de red:");
+        System.out.println(result);
         return new Response(0, "Interfaces de red:\n" + result);
     }
 
     // Manejar listado de puertos
     private Response handleListPorts(String ip, String clientPrefix) {
-        System.out.println("[Listar puertos]");
-        System.out.println("  • Solicitante : " + (clientPrefix.isEmpty() ? "(desconocido)" : clientPrefix));
-        System.out.println("  • IP objetivo : " + ip);
+        System.out.println(clientPrefix + " solicito puertos abiertos de: " + ip);
 
         // Validar IP
         if(!isValidIP(ip)) {
-            System.out.println("  • Validación: IP inválida");
-            System.out.println("----------------------------------------------");
-            return new Response(-1, "Dirección IP inválida: " + ip);
+            return new Response(-1, "Dirección IP invalida: " + ip);
         }
-
         String result;
         // PARA WINDOWS
-        result = executeCommand("netstat -an");
+        //result = executeCommand("netstat -an");
+        // PARA LINUX
+        result = executeCommand("nmap -sT " + ip);
         if(result.contains("Error ejecutando comando") || result.trim().isEmpty()) {
             result = "Información de conexiones activas (netstat)";
         }
 
-        // PARA LINUX
-        // result = executeCommand("nmap -sT " + ip);
-
-        System.out.println("  • Puertos abiertos / conexiones activas:");
-        System.out.println(result.isEmpty() ? "  (sin salida)" : result);
-        System.out.println("----------------------------------------------");
-
+        System.out.println("Puertos abiertos en " + ip + ":");
+        System.out.println(result);
         return new Response(0, "Puertos abiertos en " + ip + ":\n" + result);
     }
 
@@ -195,16 +185,10 @@ public class PrinterI implements Demo.Printer
 
     // Manejar ejecución de comandos
     private Response handleCommand(String command, String clientPrefix) {
-        System.out.println("[Ejecutar comando]");
-        System.out.println("  • Solicitante : " + (clientPrefix.isEmpty() ? "(desconocido)" : clientPrefix));
-        System.out.println("  • Comando     : " + command);
-
+        System.out.println(clientPrefix + " solicito ejecutar: " + command);
         String result = executeCommand(command);
-
-        System.out.println("  • Resultado:");
-        System.out.println(result.isEmpty() ? "  (sin salida)" : result);
-        System.out.println("----------------------------------------------");
-
+        System.out.println("Resultado del comando:");
+        System.out.println(result);
         return new Response(0, "Resultado de '" + command + "':\n" + result);
     }
 
@@ -213,10 +197,10 @@ public class PrinterI implements Demo.Printer
         StringBuilder output = new StringBuilder();
         try {
             // PARA WINDOWS
-            Process process = Runtime.getRuntime().exec("cmd.exe /c " + command);
+            //Process process = Runtime.getRuntime().exec("cmd.exe /c " + command);
 
             // PARA LINUX
-            // Process process = Runtime.getRuntime().exec(command);
+            Process process = Runtime.getRuntime().exec(command);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));

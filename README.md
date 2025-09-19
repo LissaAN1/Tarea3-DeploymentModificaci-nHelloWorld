@@ -32,6 +32,14 @@ helloworld-ret/
 
 ### **Ejecución Local del Proyecto:**
 
+0. **Compilacion del proyecto**
+  Compila el proyecto ejecutando el siguiente comando en la terminal:
+   ```bash
+   gradle build
+   ``` 
+
+
+
 1. **Ejecuta el servidor en tu máquina local**:
    Navega al directorio del **proyecto** y ejecuta el siguiente comando:
 
