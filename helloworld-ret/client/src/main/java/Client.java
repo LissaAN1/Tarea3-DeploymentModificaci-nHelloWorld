@@ -14,6 +14,7 @@ public class Client
     private static int failedMessages = 0;
     private static long startTime = 0;
     
+    
     public static void main(String[] args)
     {
         java.util.List<String> extraArgs = new java.util.ArrayList<>();
@@ -51,6 +52,7 @@ public class Client
             System.out.println("Escriba su mensaje y presione ENTER.");
             System.out.println("Para salir escriba: 'exit'");
             System.out.println("Para ver estadísticas escriba: 'stats'");
+            System.out.println("Para prueba de carga escriba: 'loadtest'");
             System.out.println("-------------------------------------");
 
             // Inicializar mediciones de performance
@@ -69,6 +71,11 @@ public class Client
 
                 if("stats".equals(message)) {
                     showPerformanceStats();
+                    continue;
+                }
+
+                if("loadtest".equals(message)) {
+                    performLoadTest(service, clientPrefix);
                     continue;
                 }
 
@@ -95,7 +102,7 @@ public class Client
                     System.out.println("-------------------------------------");
                 } catch(Exception e) {
                     failedMessages++;
-                    System.err.println("\n⚠️ Error al comunicarse con el servidor: " + e.getMessage());
+                    System.err.println("\nError al comunicarse con el servidor: " + e.getMessage());
                 }
             }
 
@@ -114,33 +121,82 @@ public class Client
         System.out.println("   Mensajes exitosos: " + successfulMessages);
         System.out.println("   Mensajes fallidos: " + failedMessages);
         
-        // Calcular Missing Rate
+        // Calcular Missing Rate (Porcentaje de solicitudes perdidas)
         double missingRate = 0.0;
         if (totalMessages > 0) {
             missingRate = (double) failedMessages / totalMessages * 100.0;
         }
-        System.out.println("   Missing Rate: " + String.format("%.2f", missingRate) + "%");
+        System.out.println("   Missing Rate (solicitudes perdidas): " + String.format("%.2f", missingRate) + "%");
         
-        // Calcular Throughput
-        double throughput = 0.0;
+        // Calcular Throughput promedio (solicitudes/segundo)
+        double avgThroughput = 0.0;
         if (totalTime > 0) {
-            throughput = (double) successfulMessages / (totalTime / 1000.0);
+            avgThroughput = (double) totalMessages / (totalTime / 1000.0);
         }
-        System.out.println("   Throughput: " + String.format("%.2f", throughput) + " mensajes/segundo");
+        System.out.println("   Throughput promedio: " + String.format("%.2f", avgThroughput) + " solicitudes/segundo");
         
-        // Calcular estadísticas de Latencia
+        // Calcular estadísticas de Latencia (método básico)
         if (!latencies.isEmpty()) {
-            long minLatency = latencies.stream().mapToLong(Long::longValue).min().orElse(0);
-            long maxLatency = latencies.stream().mapToLong(Long::longValue).max().orElse(0);
-            double avgLatency = latencies.stream().mapToLong(Long::longValue).average().orElse(0.0);
+            long minLatency = latencies.get(0);
+            long maxLatency = latencies.get(0);
+            long totalLatency = 0;
             
-            System.out.println("   Latencia mínima: " + minLatency + " ms");
-            System.out.println("   Latencia máxima: " + maxLatency + " ms");
-            System.out.println("   Latencia promedio: " + String.format("%.2f", avgLatency) + " ms");
+            // Buscar mínimo y máximo
+            for (long latency : latencies) {
+                if (latency < minLatency) minLatency = latency;
+                if (latency > maxLatency) maxLatency = latency;
+                totalLatency += latency;
+            }
+            
+            double avgLatency = (double) totalLatency / latencies.size();
+            
+            System.out.println("   Latencia promedio por solicitud: " + String.format("%.2f", avgLatency) + " ms");
+            System.out.println("   Latencia máxima observada: " + maxLatency + " ms");
+            System.out.println("   Latencia mínima observada: " + minLatency + " ms");
         } else {
             System.out.println("   No hay datos de latencia disponibles");
         }
         
         System.out.println("==========================================\n");
+    }
+    
+    // Método para realizar prueba de carga (simplificado)
+    private static void performLoadTest(Demo.PrinterPrx service, String clientPrefix) {
+        System.out.println("\n===== INICIANDO PRUEBA DE CARGA =====");
+        System.out.println("Enviando 10 mensajes rápidos...");
+        
+        long inicio = System.currentTimeMillis();
+        int exitosos = 0;
+        int fallidos = 0;
+        
+        for (int i = 1; i <= 10; i++) {
+            String mensaje = clientPrefix + ": " + i;
+            
+            try {
+                Response respuesta = service.printString(mensaje);
+                exitosos++;
+                System.out.println("Mensaje " + i + " enviado correctamente");
+                
+                // Pausa pequeña
+                Thread.sleep(200);
+                
+            } catch (Exception e) {
+                fallidos++;
+                System.out.println("Error en mensaje " + i);
+            }
+        }
+        
+        long fin = System.currentTimeMillis();
+        double duracion = (fin - inicio) / 1000.0;
+        double throughput = 10.0 / duracion;
+        double missingRate = (double) fallidos / 10.0 * 100.0;
+        
+        System.out.println("\n===== RESULTADOS PRUEBA DE CARGA =====");
+        System.out.println("Duración: " + String.format("%.2f", duracion) + " segundos");
+        System.out.println("Throughput en carga alta: " + String.format("%.2f", throughput) + " solicitudes/segundo");
+        System.out.println("Missing Rate en carga alta: " + String.format("%.2f", missingRate) + "%");
+        System.out.println("Mensajes exitosos: " + exitosos);
+        System.out.println("Mensajes fallidos: " + fallidos);
+        System.out.println("=====================================\n");
     }
 }

@@ -39,17 +39,21 @@ cd helloworld-ret/client
 ### 4. Métricas que se Miden
 
 #### Latencia (Tiempo de Respuesta)
-- **Qué mide**: Tiempo desde que se envía el mensaje hasta que llega la respuesta
+- **Latencia por solicitud**: Se muestra en cada respuesta individual del servidor
+- **Latencia promedio por solicitud**: Promedio de todas las latencias medidas
+- **Latencia máxima observada**: La latencia más alta registrada
+- **Latencia mínima observada**: La latencia más baja registrada
 - **Unidad**: Milisegundos (ms)
 - **Valores típicos**: 1-100ms en red local
 
 #### Throughput (Rendimiento)
-- **Qué mide**: Cantidad de mensajes procesados por segundo
-- **Unidad**: mensajes/segundo
-- **Valores típicos**: 10-100 mensajes/segundo
+- **Throughput promedio**: Cantidad total de solicitudes por segundo durante toda la sesión
+- **Throughput en carga alta**: Medición específica durante prueba de carga (10 mensajes rápidos)
+- **Unidad**: solicitudes/segundo
+- **Valores típicos**: 0.5-10 solicitudes/segundo
 
 #### Missing Rate (Tasa de Pérdida)
-- **Qué mide**: Porcentaje de mensajes que fallan o se pierden
+- **Qué mide**: Porcentaje de solicitudes perdidas (fallidas)
 - **Unidad**: Porcentaje (%)
 - **Valores típicos**: 0-5% en condiciones normales
 
@@ -81,11 +85,25 @@ listports 127.0.0.1
 !echo "Hola mundo"
 !dir
 
-# Ver estadísticas
+# Ver estadísticas completas
 stats
+
+# Prueba de carga (20 mensajes rápidos)
+loadtest
 
 # Salir
 exit
+```
+
+### 6.1. Ejemplo de Respuesta Individual
+```
+ Ingrese mensaje: 5
+
+Respuesta del servidor:
+Estado: 0
+Mensaje: Factores primos de Fibonacci(5): [5]
+Latencia: 23 ms
+-------------------------------------
 ```
 
 ### 7. Escenarios de Prueba
@@ -103,3 +121,48 @@ exit
 - Enviar muchos mensajes seguidos
 - Probar con números grandes de Fibonacci (ej: 20, 30)
 - Verificar estabilidad del servidor
+
+### 8. Ejemplos de Resultados Esperados
+
+#### Cliente Individual
+```
+ ===== ESTADÍSTICAS DE PERFORMANCE =====
+   Tiempo total de sesión: 30.5 segundos
+   Total de mensajes enviados: 15
+   Mensajes exitosos: 15
+   Mensajes fallidos: 0
+   Missing Rate (solicitudes perdidas): 0.00%
+   Throughput promedio: 0.49 solicitudes/segundo
+
+   Latencia promedio por solicitud: 23.5 ms
+   Latencia máxima observada: 45 ms
+   Latencia mínima observada: 12 ms
+==========================================
+```
+
+#### Cliente con Prueba de Carga
+```
+===== RESULTADOS PRUEBA DE CARGA =====
+Duración: 2.50 segundos
+Throughput en carga alta: 4.00 solicitudes/segundo
+Missing Rate en carga alta: 0.00%
+Mensajes exitosos: 10
+Mensajes fallidos: 0
+=====================================
+```
+
+#### Cliente con Carga Múltiple
+```
+ ===== ESTADÍSTICAS DE PERFORMANCE =====
+   Tiempo total de sesión: 25.2 segundos
+   Total de mensajes enviados: 20
+   Mensajes exitosos: 18
+   Mensajes fallidos: 2
+   Missing Rate (solicitudes perdidas): 10.00%
+   Throughput promedio: 0.79 solicitudes/segundo
+
+   Latencia promedio por solicitud: 67.3 ms
+   Latencia máxima observada: 120 ms
+   Latencia mínima observada: 25 ms
+==========================================
+```
