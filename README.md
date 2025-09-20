@@ -41,14 +41,14 @@ helloworld-ret/
 
 
 1. **Ejecuta el servidor en tu máquina local**:
-   Navega al directorio del **proyecto** y ejecuta el siguiente comando:
+   Navega al directorio del **proyecto** (helloword-ret) y ejecuta el siguiente comando:
 
    ```bash
    java -jar server/build/libs/server.jar
    ```
 
 2. **Ejecuta el cliente en las otras máquinas**:
-   En las otras máquinas (o en el mismo equipo para pruebas locales), navega al directorio del **proyecto** y ejecuta:
+   En las otras consolas , navega al directorio del **proyecto** ((helloword-ret)) y ejecuta:
 
    ```bash
    java -jar client/build/libs/client.jar
@@ -60,12 +60,53 @@ helloworld-ret/
    - **(C)** `listports <IPv4>` → Puertos y servicios abiertos
    - **(D)** `!<comando>` → Ejecutar comando en el servidor
    - **(E)** Finalización del ciclo con `exit`
+   - **(F)** Revisar atributos de performance `stats`
 
 ---
+### **Ejecución remota del Proyecto:**
 
+1. **Ejecuta el servidor**:
+   Debes conectarte por medio ssh al dispositivo
+   ```bash
+   ssh swarch@192.168.131.106
+   ```
+   navegar hasta la ruta
 
-### **Mediciones de Atributos de Calidad (Performance)**
+   ```bash
+       cd ~/Documents/ANGYHURTADO_DANIELTRUJILLO
+   ```
+   ejecuta el siguiente comando:
 
+   ```bash
+   java -jar server.jar
+   ```
 
+2. **Ejecuta el cliente**:
+   Debes conectarte por medio ssh al dispositivo
+   ```bash
+   ssh swarch@192.168.131.110
+   ```
+   navegar hasta la ruta
+
+   ```bash
+       cd ~/Documents/ANGYHURTADO_DANIELTRUJILLO
+   ```
+   ejecuta el siguiente comando:
+
+   ```bash
+   java -jar client.jar
+   ```
+   Para conectar un segundo cliente nos debemos conectar por medio de ssh al dispositivo
+   ```bash
+   ssh swarch@192.168.131.113
+   ```
+   
+3. **Pruebas de funcionalidad**:
+   - **(A)** Número entero positivo → Fibonacci y factores primos
+   - **(B)** `listifs` → Interfaces lógicas del servidor
+   - **(C)** `listports <IPv4>` → Puertos y servicios abiertos
+   - **(D)** `!<comando>` → Ejecutar comando en el servidor
+   - **(E)** Finalización del ciclo con `exit`
+   - **(F)** Revisar atributos de performance `stats`
 
 ---
